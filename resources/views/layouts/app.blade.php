@@ -24,7 +24,7 @@
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       
       <ul class="navbar-nav mr-auto">
-        @foreach (config('const.category') as $id => $value)
+        @foreach ($categories as $id => $value)
         <li class="nav-item">
           <a class="nav-link" href="list?category_id={{ $id }}">{{ $value }}</a>
         </li>
@@ -74,6 +74,7 @@
     <p class="float-left">© 2025 荒木生花店</p>
     <ul class="list-inline">
       <li class="list-inline-item"><a href="/term">特定商取引法に基づく表記</a></li>
+      <li class="list-inline-item"><a href="/cancel_policy">キャンセルポリシー</a></li>
       <li class="list-inline-item"><a href="/privacy">プライバシーポリシー</a></li>
       <li class="list-inline-item"><a href="/contact">お問い合わせ</a></li>
     </ul>

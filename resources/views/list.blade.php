@@ -7,8 +7,7 @@
         {{ session('status') }}
       </div>
       @endif
-      @php $cat = config('const.category'); @endphp
-      <h4 class="mb-4">{{ $cat[$category_id] ?? '' }}の商品</h4>
+      <h4 class="mb-4">{{ $categories[$category_id] ?? '' }}の商品</h4>
       <div class="row">
       @if (count($products))
       @foreach ($products as $product)

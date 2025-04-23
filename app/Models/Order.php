@@ -17,7 +17,9 @@ class Order extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'member_id',
         'name',
+        'contact_name',
         'email',
         'zip',
         'pref_id',
@@ -32,6 +34,9 @@ class Order extends Model
         'ship_address1',
         'ship_address2',
         'ship_tel',
+        'ship_date',
+        'ship_time_id',
+        'ship_request',
         'sum',
         'fee',
         'total',

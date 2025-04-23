@@ -7,16 +7,15 @@
       <div class="col-md-6">
         <h5>ご注文履歴</h5>
         <p><small>ご注文内容の確認ができます。</small></p>
-        <button type="button" class="btn btn-info">ご注文履歴を確認する</button>
+        <a class="btn btn-info" href="/history">ご注文履歴を確認する</a>
       </div>
       <div class="col-md-6">
         <h5>アカウント設定</h5>
-        <p class="mt-2 mb-0"><button type="button" class="btn btn-link">ご登録情報を確認・変更する</button></p>
-        <p class="pt-0"><button type="button" class="btn btn-link">発送先情報を確認・変更する</button></p>
+        <p class="mt-2 mb-0"><a class="btn btn-link" href="/profile">ご登録情報を確認・変更する</a></p>
+        <!-- <p class="pt-0"><button type="button" class="btn btn-link">発送先情報を確認・変更する</button></p> -->
       </div>
     </div>
   </div>
-
 @endsection
 
 @section('css')

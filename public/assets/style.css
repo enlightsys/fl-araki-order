@@ -46,3 +46,6 @@ a:hover {
 .btn-info:focus, .btn-info:not(:disabled):not(.disabled):active:focus {
   box-shadow: unset;
 }
+.form-control::placeholder{
+  color: #cccccc;
+}

@@ -26,7 +26,12 @@ class PurchaseRequest extends FormRequest
         $rules = [
             'name' => 'required',
             'email' => 'required|email',
+            'ship_date' => 'required',
             'ship_name' => 'required',
+            'ship_zip' => 'required',
+            'ship_pref_id' => 'required',
+            'ship_city' => 'required',
+            'ship_address1' => 'required',
         ];
 
         return $rules;
@@ -38,7 +43,12 @@ class PurchaseRequest extends FormRequest
             'name.required' => 'お名前を入力して下さい。',
             'email.required' => 'メールアドレスを入力して下さい。',
             'email.email' => 'メールアドレスを正しく入力して下さい。',
+            'ship_date.required' => 'お届け希望日を入力して下さい。',
             'ship_name.required' => 'お名前を入力して下さい。',
+            'ship_zip.required' => '発送先郵便番号を入力して下さい。',
+            'ship_pref_id.required' => '発送先都道府県を選択して下さい。',
+            'ship_city.required' => '発送先市区町村を入力して下さい。',
+            'ship_address1.required' => '発送先住所を入力して下さい。',
         ];
     }
 }

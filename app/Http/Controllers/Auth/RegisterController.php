@@ -51,8 +51,16 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:members'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'name.required' => "名前を入力してください。",
+            'email.required' => "メールアドレスを入力してください。",
+            'email.unique' => "そのメールアドレスは既に登録されています。",
+            'email.email' => "メールアドレスを正しく入力してください。",
+            'password.required' => "パスワードを入力してください。",
+            'password.confirmed' => "パスワードが確認用の値と一致しません。",
         ]);
     }
 
@@ -66,6 +74,7 @@ class RegisterController extends Controller
     {
         return Member::create([
             'name' => $data['name'],
+            'contact_name' => $data['contact_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);

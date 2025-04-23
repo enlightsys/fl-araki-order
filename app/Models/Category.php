@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class OrderDetail extends Model
+class Category extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -17,16 +17,10 @@ class OrderDetail extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'order_id',
-        'product_id',
-        'name',
-        'price',
-        'quantity',
+        'site_id',
+        'category',
+        'rank',
     ];
 
-    public function product()
-    {
-        return $this->belongsTo('App\Models\Product');
-    }
 
 }

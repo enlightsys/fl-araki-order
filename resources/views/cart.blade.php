@@ -7,6 +7,11 @@
       {{ session('status') }}
     </div>
     @endif
+    @if (session('warning'))
+    <div class="alert alert-warning" role="alert">
+      {{ session('warning') }}
+    </div>
+    @endif
 
     <div class="card">
       <div class="card-header">
@@ -14,55 +19,59 @@
       </div>
       <div class="card-body">
         @if ($cart)
-        <table class="table table-hover shopping-cart-wrap">
-          <thead class="text-muted">
-            <tr>
-              <th scope="col">商品</th>
-              <th scope="col" width="120">数量</th>
-              <th scope="col" width="120">単価</th>
-              <th scope="col" width="200" class="text-right">操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach ($cart as $id => $quantity)
-            <tr>
-              <td>
-                <figure class="media">
-                  <div class="img-wrap"><img src="https://flower-araki.jp/data/images/{{ $products[$id]->image1 }}" class="img-thumbnail img-sm"></div>
-                  <figcaption class="media-body">
-                    <h6 class="title text-truncate">{{ $products[$id]->name }}</h6>
-                    {{--
-                    <dl class="param param-inline small">
-                      <dt>Size: </dt>
-                      <dd>XXL</dd>
-                    </dl>
-                    <dl class="param param-inline small">
-                      <dt>Color: </dt>
-                      <dd>Orange color</dd>
-                    </dl>
-                    --}}
-                  </figcaption>
-                </figure> 
-              </td>
-              <td> 
-                <select class="form-control">
-                  @for ($i = 1;$i < 11;$i++)
-                  <option value="{{ $i }}" @if ($i == $quantity) selected="selected" @endif>{{ $i }}</option>
-                  @endfor
-                </select> 
-              </td>
-              <td> 
-                <div class="price-wrap"> 
-                  <var class="price">{{ number_format($products[$id]->price) }} 円</var>
-                </div> <!-- price-wrap .// -->
-              </td>
-              <td class="text-right"> 
-                <a href="" class="btn btn-outline-danger btn-round"> × 削除</a>
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+        <form class="" action="{{ route('cart_quantity') }}" method="post" id="formCart">
+          @csrf
+          <table class="table table-hover shopping-cart-wrap">
+            <thead class="text-muted">
+              <tr>
+                <th scope="col">商品</th>
+                <th scope="col" width="120">数量</th>
+                <th scope="col" width="120">単価</th>
+                <th scope="col" width="200" class="text-right">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach ($cart as $id => $quantity)
+              <tr>
+                <td>
+                  <figure class="media">
+                    <div class="img-wrap"><img src="https://flower-araki.jp/data/images/{{ $products[$id]->image1 }}" class="img-thumbnail img-sm"></div>
+                    <figcaption class="media-body">
+                      <h6 class="title text-truncate">{{ $products[$id]->name }}</h6>
+                      {{--
+                      <dl class="param param-inline small">
+                        <dt>Size: </dt>
+                        <dd>XXL</dd>
+                      </dl>
+                      <dl class="param param-inline small">
+                        <dt>Color: </dt>
+                        <dd>Orange color</dd>
+                      </dl>
+                      --}}
+                    </figcaption>
+                  </figure> 
+                </td>
+                <td> 
+                  <select class="form-control" id="cartQuantity" name="quantity[{{ $id }}]">
+                    @for ($i = 1;$i < 11;$i++)
+                    <option value="{{ $i }}" @if ($i == $quantity) selected="selected" @endif>{{ $i }}</option>
+                    @endfor
+                  </select>
+                </td>
+                <td> 
+                  <div class="price-wrap"> 
+                    <var class="price">{{ number_format($products[$id]->price * $quantity) }} 円</var>
+                  </div> <!-- price-wrap .// -->
+                </td>
+                <td class="text-right"> 
+                  <input type="hidden" id="removeId{{ $id }}" name="remove[{{ $id }}]" value="0" />
+                  <a href="#" class="btn btn-outline-danger btn-round btn-delete" data-id="{{ $id }}"> × 削除</a>
+                </td>
+              </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </form>
         @else
           <p>ただいまカートには何も入っていません。</p>
         @endif
@@ -87,7 +96,7 @@
           <li>北陸/中部 2,200円（税込）</li>
           <li>関西 2,510円（税込）</li>
           <li>中国/四国 2,670円（税込）</li>
-          <li>九州　2,930円（税込）</li>
+          <li>九州 2,930円（税込）</li>
           <li>沖縄 3,590円（税込）</li>
         </ul>
       </div>
@@ -147,5 +156,14 @@ var {
 
 @section('js')
 <script type="text/javascript">
+  $(function(){
+    $("#cartQuantity").change(function() {
+      $("#formCart").submit();
+    });
+    $(".btn-delete").click(function() {
+      $("#removeId" + $(this).data('id')).val(1);
+      $("#formCart").submit();
+    });
+  });
 </script>
 @stop
