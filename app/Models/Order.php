@@ -31,15 +31,19 @@ class Order extends Model
         'ship_zip',
         'ship_pref_id',
         'ship_city',
-        'ship_address1',
-        'ship_address2',
+        'ship_address',
         'ship_tel',
         'ship_date',
         'ship_time_id',
         'ship_request',
         'sum',
         'fee',
+        'in_fee',
         'total',
+        'payment_id',
+        'remark',
+        'status_id',
+        'estimate',
     ];
 
 

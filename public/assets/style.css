@@ -35,6 +35,12 @@ a:hover {
 .bg-dark {
   background-color: #454842 !important;
 }
+.bg-dark a, .bg-dark p {
+  color: #ddd !important;
+}
+.bg-dark a.dropdown-item {
+  color: #666 !important;
+}
 .btn-info, .btn-info:not(:disabled):not(.disabled):active {
   background-color: #4caf50;
   border: 0;
@@ -47,5 +53,11 @@ a:hover {
   box-shadow: unset;
 }
 .form-control::placeholder{
-  color: #cccccc;
+  color: #b8b8b8;
+}
+.navbar-nav .nav-item {
+  font-size: 0.9em;
+}
+.searchbox {
+  width: 180px !important;
 }

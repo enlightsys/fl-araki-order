@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+@php $pref = config('const.pref'); @endphp
 <div class="container">
   <div class="row justify-content-center mt-4">
     <div class="col-md-8">
@@ -16,7 +17,7 @@
               <p class="form-control-plaintext">{{ $member['email'] }}</p>
             </div>
           </div>
-
+{{--
           <div class="row mb-4">
             <div class="col-md-6 offset-md-4">
               <a class="btn btn-info" href="/profile_email">
@@ -24,7 +25,7 @@
               </a>
             </div>
           </div>
-
+--}}
           <h5>パスワード</h5>
           <div class="row mb-4">
             <div class="col-md-6 offset-md-4">
@@ -41,11 +42,25 @@
               <p class="form-control-plaintext">{{ $member['name'] }}</p>
             </div>
           </div>
-          <div class="row mb-3">
+          <div class="row mb-0">
             <label for="name" class="col-md-4 col-form-label text-md-end">ご担当者名</label>
 
             <div class="col-md-8">
-              <p class="form-control-plaintext">{{ $member['contact_name'] }}</p>
+              <p class="form-control-plaintext">{{ $member['contact_name'] }}&nbsp;</p>
+            </div>
+          </div>
+          <div class="row mb-0">
+            <label for="name" class="col-md-4 col-form-label text-md-end">ご住所</label>
+
+            <div class="col-md-8">
+              <p class="form-control-plaintext">〒 {{ $member['zip'] }} {{ $pref[$member['pref_id']] ?? '' }} {{ $member['city'] }} {{ $member['address'] }}</p>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="name" class="col-md-4 col-form-label text-md-end">電話番号</label>
+
+            <div class="col-md-8">
+              <p class="form-control-plaintext">{{ $member['tel'] }}</p>
             </div>
           </div>
 

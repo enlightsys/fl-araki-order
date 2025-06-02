@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class OrderDetail extends Model
+class Mail extends Model
 {
     use HasFactory;
     use SoftDeletes;
@@ -18,16 +18,12 @@ class OrderDetail extends Model
      */
     protected $fillable = [
         'order_id',
-        'product_id',
-        'name',
-        'price',
-        'quantity',
-        'nameplate',
+        'subject',
+        'body',
+        'attachment1',
+        'attachment2',
+        'attachment3',
     ];
 
-    public function product()
-    {
-        return $this->belongsTo('App\Models\Product');
-    }
 
 }

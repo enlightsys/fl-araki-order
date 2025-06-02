@@ -37,6 +37,65 @@
                 @enderror
               </div>
             </div>
+            <div class="row mb-3">
+              <label for="zip" class="col-md-4 col-form-label text-md-end">ご住所 <span class="text-red">（※）</span></label>
+
+              <div class="col-md-8">
+                〒 <input type="text" class="form-control form-zip @error('zip') is-invalid @enderror" name="zip" value="{{ old('zip') }}" placeholder="0001111" onkeyup="AjaxZip3.zip2addr(this, '', 'pref_id', 'city');" />
+                <select name="pref_id" id="inputPref" class="form-control form-pref @error('pref_id') is-invalid @enderror">
+                  <option value="">-- 都道府県 --</option>
+                  @foreach (config('const.pref') as $id => $val)
+                  <option value="{{ $id }}" @if (old('pref_id') == $id) selected="selected" @endif>{{ $val }}</option>
+                  @endforeach
+                </select>
+                @error('zip')
+                <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+                @error('pref_id')
+                <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="name" class="col-md-4 col-form-label text-md-end">&nbsp;</label>
+
+              <div class="col-md-8">
+                <input id="city" type="text" class="form-control @error('city') is-invalid @enderror" name="city" value="{{ old('city') }}" placeholder="市区町村" />
+                @error('city')
+                <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="name" class="col-md-4 col-form-label text-md-end">&nbsp;</label>
+
+              <div class="col-md-8">
+                <input id="address" type="text" class="form-control @error('address') is-invalid @enderror" name="address" value="{{ old('address') }}" placeholder="番地 建物名" />
+                @error('address')
+                <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="name" class="col-md-4 col-form-label text-md-end">電話番号 <span class="text-red">（※）</span></label>
+
+              <div class="col-md-8">
+                <input id="tel" type="text" class="form-control @error('tel') is-invalid @enderror" name="tel" value="{{ old('tel') }}" autofocus>
+                @error('tel')
+                <span class="invalid-feedback" role="alert">
+                  <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+              </div>
+            </div>
 
             <div class="row mb-3">
               <label for="email" class="col-md-4 col-form-label text-md-end">メールアドレス <span class="text-red">（※）</span></label>
@@ -93,14 +152,27 @@
 
 @section('css')
 <style type="text/css">
-.text-red {
-  color: #f00;
-  font-size: 0.9em;
-}
-.text-anno {
-  color: #888;
-  font-size: 0.9em;
-  margin-bottom: 0;
-}
+  .text-red {
+    color: #f00;
+    font-size: 0.9em;
+  }
+  .text-anno {
+    color: #888;
+    font-size: 0.9em;
+    margin-bottom: 0;
+  }
+  .form-zip {
+    display: inline-block;
+    width: 200px;
+  }
+  .form-pref {
+    display: inline-block;
+    width: 200px;
+  }
 </style>
+@stop
+
+
+@section('js')
+<script src="https://ajaxzip3.github.io/ajaxzip3.js" charset="UTF-8"></script>
 @stop

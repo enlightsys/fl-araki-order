@@ -31,36 +31,32 @@
               </tr>
             </thead>
             <tbody>
-              @foreach ($cart as $id => $quantity)
+              @foreach ($cart as $id => $value)
               <tr>
                 <td>
                   <figure class="media">
-                    <div class="img-wrap"><img src="https://flower-araki.jp/data/images/{{ $products[$id]->image1 }}" class="img-thumbnail img-sm"></div>
+                    <div class="img-wrap"><img src="/products/image?p={{ $products[$value['product_id']]->image1 }}&w=150" class="img-thumbnail img-sm"></div>
                     <figcaption class="media-body">
-                      <h6 class="title text-truncate">{{ $products[$id]->name }}</h6>
-                      {{--
+                      <h6 class="title text-truncate">{{ $products[$value['product_id']]->name }}</h6>
+                      @if ($value['nameplate'])
                       <dl class="param param-inline small">
-                        <dt>Size: </dt>
-                        <dd>XXL</dd>
+                        <dt class="align-top">名札</dt>
+                        <dd>{!! nl2br(e($value['nameplate'])) !!}</dd>
                       </dl>
-                      <dl class="param param-inline small">
-                        <dt>Color: </dt>
-                        <dd>Orange color</dd>
-                      </dl>
-                      --}}
+                      @endif
                     </figcaption>
                   </figure> 
                 </td>
-                <td> 
-                  <select class="form-control" id="cartQuantity" name="quantity[{{ $id }}]">
+                <td>
+                  <select class="form-control cart-quantity" id="" name="quantity[{{ $id }}]">
                     @for ($i = 1;$i < 11;$i++)
-                    <option value="{{ $i }}" @if ($i == $quantity) selected="selected" @endif>{{ $i }}</option>
+                    <option value="{{ $i }}" @if ($i == $value['quantity']) selected="selected" @endif>{{ $i }}</option>
                     @endfor
                   </select>
                 </td>
                 <td> 
-                  <div class="price-wrap"> 
-                    <var class="price">{{ number_format($products[$id]->price * $quantity) }} 円</var>
+                  <div class="price-wrap text-right"> 
+                    <p class="price">{{ number_format($products[$value['product_id']]->price * $value['quantity']) }} 円</p>
                   </div> <!-- price-wrap .// -->
                 </td>
                 <td class="text-right"> 
@@ -87,22 +83,14 @@
     <hr class="mt-4" />
     <div class="row">
       <div class="ml-auto mr-auto col-md-6">
-        <h5>配送料金について</h5>
+        <h5>花キューピット以外の配送料金について（税込）</h5>
         <ul class="small">
-          <li>北海道 1,530円（税込）</li>
-          <li>北東北（青森県、岩手県、秋田県）1,790円（税込）</li>
-          <li>南東北（宮城県、山形県、福島県）1,920円（税込）</li>
-          <li>関東/信越（新潟県/長野県） 1,740円（税込）</li>
-          <li>北陸/中部 2,200円（税込）</li>
-          <li>関西 2,510円（税込）</li>
-          <li>中国/四国 2,670円（税込）</li>
-          <li>九州 2,930円（税込）</li>
-          <li>沖縄 3,590円（税込）</li>
+          <li>北海道札幌市中央区 770円</li>
+          <li>北海道札幌市中央区以外 880円</li>
+          <li>北海道北広島市、石狩市 1,100円</li>
         </ul>
       </div>
     </div>
-
-
   </div>
 
 @endsection
@@ -157,7 +145,7 @@ var {
 @section('js')
 <script type="text/javascript">
   $(function(){
-    $("#cartQuantity").change(function() {
+    $(".cart-quantity").change(function() {
       $("#formCart").submit();
     });
     $(".btn-delete").click(function() {

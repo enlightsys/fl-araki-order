@@ -15,23 +15,36 @@
   @yield('css')
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand " href="/">{{ config('app.name', 'Laravel') }}</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <a class="navbar-brand" href="/">{{ config('app.name', 'Laravel') }}</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
       
       <ul class="navbar-nav mr-auto">
-        @foreach ($categories as $id => $value)
-        <li class="nav-item">
-          <a class="nav-link" href="list?category_id={{ $id }}">{{ $value }}</a>
+        @foreach ($categories as $id => $category)
+        <li class="nav-item @if ($category->sub_category) dropdown @endif">
+          <a class="nav-link @if ($category->sub_category) dropdown-toggle @endif" href="list?category_id={{ $id }}" @if ($category->sub_category) data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" @endif>{{ $category->category }}</a>
+
+          @if ($category->sub_category)
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+            @foreach ($category->sub_category as $sub_category)
+            <a class="dropdown-item" href="/list?sub_category_id={{ $sub_category->id }}">{{ $sub_category->sub_category }}</a>
+            @endforeach
+          </div>
+          @endif
         </li>
         @endforeach
       </ul>
 
       <ul class="navbar-nav">
+
+        <form class="form-inline my-2 my-md-0 mr-1" action="/list" method="get">
+          <input class="form-control searchbox" type="text" placeholder="検索" name="freeword" value="{{ $freeword ?? '' }}" />
+        </form>
         <!-- Authentication Links -->
         @guest
         @if (Route::has('login'))
@@ -46,7 +59,7 @@
         @endif
         @else
         <li class="nav-item dropdown">
-          <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+          <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             {{ Auth::user()->name }} 様
           </a>
 
@@ -64,12 +77,12 @@
         </li>
       </ul>
     </div>
-  </div>
-</nav>
+  </nav>
+
 <main role="main">
   @yield('content')
 </main>
-<footer class="footer">
+<footer class="footer bg-dark">
   <div class="container text-center text-muted">
     <p class="float-left">© 2025 荒木生花店</p>
     <ul class="list-inline">
@@ -84,7 +97,7 @@
 
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"></script>
 @yield('js')

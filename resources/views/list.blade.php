@@ -7,14 +7,14 @@
         {{ session('status') }}
       </div>
       @endif
-      <h4 class="mb-4">{{ $categories[$category_id] ?? '' }}の商品</h4>
+      <h4 class="mb-4">{{ $freeword}} {{ $category->category ?? '' }} {{ $sub_category->sub_category ?? '' }} の商品</h4>
       <div class="row">
       @if (count($products))
       @foreach ($products as $product)
         <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
             <a href="{{ route('detail', $product->id)}}">
-              <img src="https://flower-araki.jp/data/images/{{ $product->image1 }}" alt="{{ $product->name }}" class="card-img-top" />
+              <img src="/products/image?p={{ $product->image1 }}" alt="{{ $product->name }}" class="card-img-top" />
               <div class="card-body">
                 <p class="card-text">{{ $product->name }}</p>
                 <small class="text-muted">{{ number_format($product->price) }} 円</small>

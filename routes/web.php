@@ -27,6 +27,7 @@ Route::get('/contact', [App\Http\Controllers\SiteController::class, 'contact'])-
 Route::post('/contact_confirm', [App\Http\Controllers\SiteController::class, 'contact_confirm'])->name('contact_confirm');
 Route::post('/contact_store', [App\Http\Controllers\SiteController::class, 'contact_store'])->name('contact_store');
 Route::get('/contact_complete', [App\Http\Controllers\SiteController::class, 'contact_complete'])->name('contact_complete');
+Route::get('/products/image', [App\Http\Controllers\SiteController::class, 'image']);
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::get('/mypage', [App\Http\Controllers\SiteController::class, 'mypage'])->name('mypage');
@@ -39,6 +40,9 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/history_detail/{id}', [App\Http\Controllers\SiteController::class, 'history_detail'])->name('history_detail');
 	Route::post('/reorder/{id}', [App\Http\Controllers\SiteController::class, 'reorder'])->name('reorder');
 	Route::get('/checkout', [App\Http\Controllers\SiteController::class, 'checkout'])->name('checkout');
+	Route::post('/purchase_check', [App\Http\Controllers\SiteController::class, 'purchase_check'])->name('purchase_check');
 	Route::post('/purchase', [App\Http\Controllers\SiteController::class, 'purchase'])->name('purchase');
 	Route::get('/complete', [App\Http\Controllers\SiteController::class, 'complete'])->name('complete');
+	Route::post('/zeus_enroll', [App\Http\Controllers\SiteController::class, 'zeus_enroll'])->name('zeus_enroll');
+	Route::any('/zeus_term', [App\Http\Controllers\SiteController::class, 'zeus_term'])->name('zeus_term');
 });

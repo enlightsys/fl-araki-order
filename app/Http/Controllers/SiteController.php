@@ -13,8 +13,14 @@ use App\Models\Product;
 use App\Models\Member;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Category;
+use App\Models\SubCategory;
+use App\Models\Mail as MailModel;
 use App\Mail\MailContactAdmin;
 use App\Mail\MailContactUser;
+use App\Mail\MailCheckoutAdmin;
+use App\Mail\MailCheckoutUser;
+use Intervention\Image\ImageManagerStatic;
 
 class SiteController extends Controller
 {
@@ -25,7 +31,10 @@ class SiteController extends Controller
 
     public function index()
     {
-        $products = Product::where('site_id', 1)->limit(18)->get();
+        $products = Product::where('site_id', 1)
+            ->limit(18)
+            ->where('publish_id', 1)
+            ->get();
 
         return view('index', compact('products'));
     }
@@ -34,6 +43,7 @@ class SiteController extends Controller
     {
         $freeword = $request->input('freeword') ?? "";
         $category_id = $request->input('category_id') ?? null;
+        $sub_category_id = $request->input('sub_category_id') ?? null;
 
         $request->session()->put('front_cond', $request->query());
 
@@ -43,16 +53,29 @@ class SiteController extends Controller
             ->when($category_id, function ($query) use ($category_id) {
                 return $query->where('category_id', $category_id);
             })
+            ->when($sub_category_id, function ($query) use ($sub_category_id) {
+                return $query->where('sub_category_id', $sub_category_id);
+            })
             ->where('site_id', 1)
+            ->where('publish_id', 1)
             ->orderByDesc('updated_at')
             ->paginate(20);
 
-        return view('list', compact('products', 'freeword', 'category_id'));
+        $category = null;
+        if ($category_id) {
+            $category = Category::find($category_id);
+        }
+        $sub_category = null;
+        if ($sub_category_id) {
+            $sub_category = SubCategory::find($sub_category_id);
+            // $category = Category::find($sub_category->category_id);
+        }
+        return view('list', compact('products', 'freeword', 'category', 'sub_category'));
     }
 
     public function detail($id)
     {
-        $product = Product::where('site_id', 1)->where('id', $id)->first();
+        $product = Product::where('site_id', 1)->where('publish_id', 1)->where('id', $id)->first();
 
         if (!$product) {
             return redirect('/');
@@ -70,12 +93,18 @@ class SiteController extends Controller
             return redirect('/');
         }
 
-        $cart = $request->session()->get('cart');
-
-        if (!empty($cart[$input['id']])) {
-            $cart[$input['id']] += $input['quantity'];
+        $cart = $request->session()->get('cart') ?? [];
+        $id = -1;
+        foreach ($cart as $key => $value) {
+            if ($value['product_id'] == $input['id'] && $value['nameplate'] == $input['nameplate']) {
+                $id = $key;
+                break;
+            }
+        }
+        if ($id == -1) {
+            $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => $input['quantity']];
         } else {
-            $cart[$input['id']] = $input['quantity'];
+            $cart[$id]['quantity'] += $input['quantity'];
         }
 
         $request->session()->put('cart', $cart);
@@ -88,8 +117,8 @@ class SiteController extends Controller
         $cart = $request->session()->get('cart') ?? [];
         $products = [];
 
-        foreach ($cart as $id => $value) {
-            $products[$id] = Product::find($id);
+        foreach ($cart as $value) {
+            $products[$value['product_id']] = Product::find($value['product_id']);
         }
 
         return view('cart', compact('cart', 'products'));
@@ -101,7 +130,7 @@ class SiteController extends Controller
         $cart = $request->session()->get('cart');
 
         foreach ($input['quantity'] as $id => $q) {
-            $cart[$id] = $q;
+            $cart[$id]['quantity'] = $q;
         }
         foreach ($input['remove'] as $id => $remove) {
             if ($remove == "1") {
@@ -125,15 +154,26 @@ class SiteController extends Controller
         $member = Member::find($member_id);
 
         $products = [];
+        $free = 1;
+        $card_disabled = 0;
         foreach ($cart as $id => $value) {
-            $products[$id] = Product::find($id);
+            $product = Product::find($value['product_id']);
+            if ($product->free_delivery == 0) {
+                $free = 0;
+            }
+            if ($product->card_disabled == 1) {
+                $card_disabled = 1;
+            }
+            $products[$value['product_id']] = $product;
         }
 
-        return view('checkout', compact('cart', 'products', 'member'));
+        return view('checkout', compact('cart', 'products', 'member', 'free', 'card_disabled'));
     }
 
     public function purchase(PurchaseRequest $request)
     {
+        \Log::info($request->all());
+
         $cart = $request->session()->get('cart') ?? [];
         if (!$cart) {
             return view('error', ['message' => "エラーが発生しました。"]);
@@ -141,30 +181,140 @@ class SiteController extends Controller
 
         $input = $request->all();
         $input['member_id'] = Auth::user()->id;
+        $input['status_id'] = 1;
         $ret = Order::create($input);
 
         $products = [];
 
-        foreach ($cart as $id => $quantity) {
-            $product = Product::find($id);
+        foreach ($cart as $value) {
+            $product = Product::find($value['product_id']);
 
             $arr = [
                 'order_id' => $ret->id,
                 'product_id' => $product->id,
                 'name' => $product->name,
                 'price' => $product->price,
-                'quantity' => $quantity,
+                'quantity' => $value['quantity'],
+                'nameplate' => $value['nameplate'],
             ];
 
             $detail = OrderDetail::create($arr);
+
+            $product->quantity = $value['quantity'];
+            $product->nameplate = $value['nameplate'];
+
+            $products[] = $product->toArray();
         }
 
-        $request->session()->put('cart', []);
+        if ($request->has("zeus_xid")) {
+            // $url = "https://secure2-sandbox.cardservice.co.jp/cgi-bin/secure/api.cgi"; //testing
+            $url = "https://linkpt.cardservice.co.jp/cgi-bin/secure/api.cgi";  //prod
 
+            $xid = $request->input("zeus_xid") ?? '';
+
+            if ($xid) {
+                $xml = <<< EOM
+<?xml version="1.0" encoding="utf-8"?>
+<request service="secure_link_3d" action="authentication">
+  <xid>$xid</xid>
+  <PaRes>Y</PaRes>
+</request>
+EOM;
+                \Log::info($xml);
+
+                $context = [
+                    'http' => [
+                        'method'  => 'POST',
+                        'header'  => 'Content-Type: application/xml',
+                        'content' => $xml
+                    ]
+                ];
+                
+                $res = file_get_contents($url, false, stream_context_create($context));
+
+                $obj = simplexml_load_string($res);
+                $arr = json_decode(json_encode($obj), true);
+
+                \Log::info($arr);
+
+                $xml = <<< EOM
+<?xml version="1.0" encoding="utf-8"?>
+<request service="secure_link_3d" action="payment">
+  <xid>$xid</xid>
+  <print_am>yes</print_am>
+  <print_addition_value>yes</print_addition_value>
+</request>
+EOM;
+                \Log::info($xml);
+
+                $context = [
+                    'http' => [
+                        'method'  => 'POST',
+                        'header'  => 'Content-Type: application/xml',
+                        'content' => $xml
+                    ]
+                ];
+
+                $res = file_get_contents($url, false, stream_context_create($context));
+
+                $obj = simplexml_load_string($res);
+                $arr = json_decode(json_encode($obj), true);
+
+                \Log::info($arr);
+            }
+        }
+
+        $mailadmin = new MailCheckoutAdmin($input, $products);
+        $body = $mailadmin->render();
+
+        // $url = "https://api.chatwork.com/v2/rooms/"."554267"."/messages";
+        $url = "https://api.chatwork.com/v2/rooms/"."255035601"."/messages";
+
+        $ch = curl_init(); // はじめ
+
+        // $headers = array("X-ChatWorkToken: "."abcbabdfcf46a30e523a837c265f3cfb");
+        $headers = array("X-ChatWorkToken: "."34da921185ed5db79dff76276228fd2f");
+
+        $adminurl = "https://manage.flower-araki.jp/orders/show/".$ret->id;
+        $owner_body = <<<EOM
+{$body}
+
+下記URLより確認をお願いします。
+{$adminurl}
+
+※ログイン画面が表示される場合は、ログイン後再度上記URLを開いてください。 
+EOM;
+        $post_data = array('body'=> $owner_body);
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
+
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($ch);
+
+        curl_close($ch);
+
+        Mail::to(config('mail.from.address'))->send($mailadmin);
+
+        $mailobj = new MailCheckoutUser($input, $products);
+        $body = $mailobj->render();
+        Mail::to($input['email'])->send($mailobj);
+
+        MailModel::create(['order_id' => $ret->id, 'subject' => $mailobj->subject, 'body' => $body]);
+
+        $request->session()->put('cart', []);
         return redirect('/complete');
     }
 
-    public function complete()
+    public function purchase_check(PurchaseRequest $request)
+    {
+        return response()->json(['status' => 'success'], 200);
+    }
+
+    public function complete(Request $request)
     {
         return view('complete');
     }
@@ -208,8 +358,8 @@ class SiteController extends Controller
             return redirect()->route('contact')->withInput($input);
         }
 
-        // Mail::to(config('mail.from.address'))->send(new MailContactAdmin(json_decode(json_encode($input))));
-        Mail::to("eil@tikar.jp")->send(new MailContactAdmin(json_decode(json_encode($input))));
+        Mail::to(config('mail.from.address'))->send(new MailContactAdmin(json_decode(json_encode($input))));
+        // Mail::to("eil@tikar.jp")->send(new MailContactAdmin(json_decode(json_encode($input))));
         Mail::to($input['email'])->send(new MailContactUser(json_decode(json_encode($input))));
 
         return redirect()->route('contact_complete')->with([
@@ -305,11 +455,22 @@ class SiteController extends Controller
         }
         $order_details = OrderDetail::where("order_id", $order_id)->get();
 
-        $cart = [];
+        $cart = $request->session()->get('cart') ?? [];
         $warn = null;
         foreach ($order_details as $detail) {
             if ($detail->product != null) {
-                $cart[$detail->product_id] = $detail->quantity;
+                $id = -1;
+                foreach ($cart as $key => $value) {
+                    if ($value['product_id'] == $detail->product_id && $value['nameplate'] == $detail->nameplate) {
+                        $id = $key;
+                        break;
+                    }
+                }
+                if ($id == -1) {
+                    $cart[] = ['product_id' => $detail->product_id, 'nameplate' => $detail->nameplate, 'quantity' => $detail->quantity];
+                } else {
+                    $cart[$id]['quantity'] += $detail->quantity;
+                }
             } else {
                 $warn = "現在扱っていない商品はカートに入りませんでした。";
             }
@@ -319,5 +480,91 @@ class SiteController extends Controller
         return redirect('/cart')->with([
             'warning' => $warn,
         ]);
+    }
+
+    public function image(Request $request) {
+        $path = $request->input("p");
+
+        $image = ImageManagerStatic::make('/home/flx20121018/flower-araki.jp/public_html/data/images/'.$path);
+        return $image->resize(480, null, function ($constraint) {
+            $constraint->aspectRatio();
+        })->response('jpg');
+    }
+
+    /**
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function zeus_enroll(Request $request)
+    {
+        $input = $request->all();
+        $token = $input['token'];
+        $amount = $input['amount'];
+
+        $memberid = Auth::user()->id;
+        $member = Member::find($memberid);
+
+        if ($token && $member) {
+            $email = $member->email;
+            $date = date("YmdHis");
+
+            $xml = <<< EOM
+<?xml version="1.0" encoding="utf-8"?>
+<request service="secure_link_3d" action="enroll">
+  <authentication>
+    <clientip>2012018157</clientip>
+    <key>ae1c5bb21c59fa5aca5c037f90e90e68e5a4a032</key>
+  </authentication>
+  <token_key>$token</token_key>
+  <payment>
+    <amount>$amount</amount>
+    <count>01</count>
+  </payment>
+  <user>
+    <email language="japanese">$email</email>
+  </user>
+  <uniq_key>
+    <sendpoint>member-$memberid-$date</sendpoint>
+  </uniq_key>
+  <use_3ds2_flag>1</use_3ds2_flag>
+</request>
+EOM;
+
+            // $url = "https://secure2-sandbox.cardservice.co.jp/cgi-bin/secure/api.cgi"; //testing
+            $url = "https://linkpt.cardservice.co.jp/cgi-bin/secure/api.cgi";  //prod
+
+            $context = [
+                'http' => [
+                    'method' => 'POST',
+                    'header' => 'Content-Type: application/xml',
+                    'content' => $xml
+                ]
+            ];
+            
+            $res = file_get_contents($url, false, stream_context_create($context));
+
+            $obj = simplexml_load_string($res);
+            $arr = json_decode(json_encode($obj), true);
+            \Log::info($arr);
+
+            if ($arr['result']['status'] == "success" || $arr['result']['status'] == "outside") {
+                return response()->json(['status' => $arr['result']['status'], 'data' => ['xid' => $arr['xid'], 'url' => $arr['iframeUrl'] ?? '']], 200);
+            } else {
+                return response()->json(['status' => 'error', 'data' => ['code' => $arr['result']['code']]], 400);
+            }
+        }
+
+        return response()->json(['status' => 'error'], 400);
+    }
+
+    /**
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function zeus_term(Request $request)
+    {
+        \Log::info($request->all());
     }
 }

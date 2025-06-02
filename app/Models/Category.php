@@ -22,5 +22,13 @@ class Category extends Model
         'rank',
     ];
 
+    public function products()
+    {
+        return $this->hasMany('App\Models\Product')->where('publish_id', 1);
+    }
 
+    public function sub_category()
+    {
+        return $this->hasMany('App\Models\SubCategory');
+    }
 }

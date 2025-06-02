@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class PurchaseRequest extends FormRequest
 {
@@ -31,7 +32,6 @@ class PurchaseRequest extends FormRequest
             'ship_zip' => 'required',
             'ship_pref_id' => 'required',
             'ship_city' => 'required',
-            'ship_address1' => 'required',
         ];
 
         return $rules;
@@ -48,7 +48,20 @@ class PurchaseRequest extends FormRequest
             'ship_zip.required' => '発送先郵便番号を入力して下さい。',
             'ship_pref_id.required' => '発送先都道府県を選択して下さい。',
             'ship_city.required' => '発送先市区町村を入力して下さい。',
-            'ship_address1.required' => '発送先住所を入力して下さい。',
         ];
     }
+
+    protected function failedValidation($validator)
+    {
+        if (request()->expectsJson()) {
+            $response['errors']  = $validator->errors()->toArray();
+
+            throw new HttpResponseException(
+                response()->json($response, 422)
+            );
+        } else {
+            parent::failedValidation($validator);
+        }
+    }
+
 }

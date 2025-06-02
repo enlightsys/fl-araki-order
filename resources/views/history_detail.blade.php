@@ -24,7 +24,7 @@
               <dt>注文ID</dt><dd>{{ $order->id + 10000 }}</dd>
               <dt>注文日</dt><dd>{{ $order->created_at->format('Y/n/j H:i') }}</dd>
               <dt>お届け希望日</dt><dd>{{ date("Y/n/j", strtotime($order->ship_date)) }} {{ $ship_time_id[$order->ship_time_id] ?? '' }} {{ $order->ship_request }}</dd>
-              <dt>お届け先</dt><dd>{{ $pref[$order->ship_pref_id] ?? '' }}{{ $order->ship_city }}{{ $order->ship_address1 }}{{ $order->ship_address2 }} {{ $order->ship_name }} 様</dd>
+              <dt>お届け先</dt><dd>{{ $pref[$order->ship_pref_id] ?? '' }}{{ $order->ship_city }}{{ $order->ship_address }} {{ $order->ship_name }} 様</dd>
               <dt>合計金額</dt><dd>{{ number_format($order->total) }} 円（税込）</dd>
             </dl>
             @endif
@@ -45,11 +45,13 @@
                   <td>
                     <figure class="media">
                       @if ($detail->product != null)
-                      <div class="img-wrap"><img src="https://flower-araki.jp/data/images/{{ $detail->product->image1 ?? '' }}" class="img-thumbnail img-sm"></div>
+                      <a href="/detail/{{ $detail->product->id }}">
+                        <div class="img-wrap"><img src="/products/image?p={{ $detail->product->image1 ?? ''}}" class="img-thumbnail img-sm"></div>
+                      </a>
                       @else
                       <div class="img-wrap"><img src="/assets/images/no_image.png" class="img-thumbnail img-sm"></div>
                       @endif
-                      <p class="title text-truncate">{{ $detail->name }}</p>
+                      <p class="title text-truncate">{{ $detail->name }}<br /><small>{{ $detail->nameplate }}</small></p>
                     </figure>
                   </td>
                   <td>{{ $detail->quantity }}</td>
@@ -61,6 +63,7 @@
             </table>
             <p class="text-right mt-3">小計：{{ number_format($order->sum) }}円</p>
             <p class="text-right">送料：{{ number_format($order->fee) }}円</p>
+            <p class="text-right">手数料：{{ number_format($order->in_fee) }}円</p>
             <p class="text-right">合計：{{ number_format($order->total) }}円</p>
           </aside>
         </div>

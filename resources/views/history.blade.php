@@ -32,7 +32,7 @@
             <tr>
               <td>{{ $order->id + 10000 }}</td>
               <td>{{ $order->created_at->format('Y/n/j H:i') }}</td>
-              <td>{{ $pref[$order->ship_pref_id] ?? '' }}{{ $order->ship_city }}{{ $order->ship_address1 }}{{ $order->ship_address2 }} {{ $order->ship_name }} 様</td>
+              <td>{{ $pref[$order->ship_pref_id] ?? '' }}{{ $order->ship_city }}{{ $order->ship_address }} {{ $order->ship_name }} 様</td>
               <td class="text-right"> {{ number_format($order->total) }} 円（税込）</var></td>
               <td class="text-right"> 
                 <a href="/history_detail/{{ $order->id }}" class="btn btn-info">詳細</a>
