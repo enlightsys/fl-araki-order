@@ -37,5 +37,14 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+
+        // ★ここから追加
+        $this->renderable(function (\Exception $e, $request) {
+            if ($e->getPrevious() instanceof TokenMismatchException) {
+                return redirect()->route('index')->withErrors([
+                    'errors' => trans('auth.csrf_token_mismatched')
+                ]);
+            };
+        });
     }
 }

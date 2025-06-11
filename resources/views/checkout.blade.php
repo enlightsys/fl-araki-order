@@ -13,7 +13,7 @@
     <form class="" action="{{ route('purchase')}}" id="checkout-form" method="post">
       <div class="row">
         @csrf
-        <div class="col-md-5 order-md-last">
+        <div class="col-md-5 order-md-last mb-4">
           <!--REVIEW ORDER-->
           <div class="card">
             <div class="card-header">ご注文商品</div>
@@ -23,7 +23,7 @@
             @endphp
             @foreach ($cart as $value)
               <div class="row mb-3">
-                <div class="col-sm-3 col-xs-3">
+                <div class="col-sm-3 col-xs-3 d-none d-md-block d-lg-block d-xl-block">
                   <img class="img-preview" src="/products/image?p={{ $products[$value['product_id']]->image1 }}&w=150" />
                 </div>
                 <div class="col-sm-6 col-xs-6 pl-1 pr-0">
@@ -111,7 +111,7 @@
                 <div class="col-md-9">
                   <input type="text" class="form-control form-delivery-date datetimepicker datetimepicker-input" name="ship_date" id="datePicker" value="{{ old('ship_date') }}" data-toggle="datetimepicker" data-target="#datePicker" />
                   @foreach (config('const.ship_time_id') as $id => $val)
-                  <div class="form-check form-check-inline">
+                  <div class="form-check form-check-inline form-check-ship">
                     <input class="form-check-input" type="radio" name="ship_time_id" id="inlineRadio{{ $id }}" value="{{ $id }}" @if (old('ship_time_id') == $id) checked="checked" @endif />
                     <label class="form-check-label" for="inlineRadio{{ $id }}">{{ $val }}</label>
                   </div>
@@ -136,7 +136,7 @@
               <div class="form-group row">
                 <div class="col-md-3 mt-1"><strong>発送先住所</strong></div>
                 <div class="col-md-9">
-                  〒 <input type="text" class="form-control form-zip" name="ship_zip" value="{{ old('ship_zip') }}" placeholder="0001111" onkeyup="AjaxZip3.zip2addr(this, '', 'ship_pref_id', 'ship_city');" />
+                  〒 <input type="text" class="form-control form-zip" name="ship_zip" value="{{ old('ship_zip') }}" maxlength="8" placeholder="0001111" onkeyup="AjaxZip3.zip2addr(this, '', 'ship_pref_id', 'ship_city');" />
                   <select name="ship_pref_id" id="inputPref" class="form-control form-pref">
                     <option value="">-- 都道府県 --</option>
                     @foreach (config('const.pref') as $id => $val)
@@ -163,7 +163,7 @@
               <div class="form-group row">
                 <div class="col-md-3 mt-1"><strong>電話番号</strong></div>
                 <div class="col-md-9">
-                  <input type="text" class="form-control" name="ship_tel" value="{{ old('ship_tel') }}" />
+                  <input type="text" class="form-control" name="ship_tel" value="{{ old('ship_tel') }}" maxlength="15" />
                   <p class="text-danger error-checkout" id="error-ship_tel">@error('ship_tel') {{ $message }} @enderror</p>
                 </div>
               </div>
@@ -299,16 +299,16 @@
   }
   .form-delivery-date {
     display: inline-block;
-    width: 150px;
-    margin-right: 10px;
+    width: 120px;
+    margin-right: 6px;
   }
   .form-zip {
     display: inline-block;
-    width: 200px;
+    width: 120px;
   }
   .form-pref {
     display: inline-block;
-    width: 200px;
+    width: 160px;
   }
   .expire1 {
     display: inline-block;
@@ -338,6 +338,15 @@
   }
   .text-danger {
     margin-bottom: 0;
+  }
+  .col-md-3 {
+    margin-bottom: 4px;
+  }
+  .form-check-label {
+    font-size: 0.9em;
+  }
+  .form-check-ship {
+    margin-right: 3px;
   }
 </style>
 @stop
@@ -373,16 +382,22 @@
     function calc_total() {
       let val = $('input[name="ship_city"').val();
       if (val.length) {
+        let sum = $("#inputSum").val() * 1;
         let fee = 550;
-        if (free == 1) {
+
+        if (sum >= 11000) {
           fee = 0;
         } else {
-          if (val.substr(0, 6) == "札幌市中央区") {
-            fee = 770;
-          } else if (val.substr(0, 3) == "札幌市") {
-            fee = 880;
-          } else if (val.substr(0, 4) == "北広島市" || val.substr(0, 3) == "石狩市") {
-            fee = 1100;
+          if (free == 1) {
+            fee = 0;
+          } else {
+            if (val.substr(0, 6) == "札幌市中央区") {
+              fee = 770;
+            } else if (val.substr(0, 3) == "札幌市") {
+              fee = 880;
+            } else if (val.substr(0, 4) == "北広島市" || val.substr(0, 3) == "石狩市") {
+              fee = 1100;
+            }
           }
         }
         const formatter = new Intl.NumberFormat('ja-JP');
@@ -390,7 +405,6 @@
         $("#text-fee").text(formatter.format(fee));
         $("#inputFee").val(fee);
 
-        let sum = $("#inputSum").val() * 1;
         $("#text-total").text(formatter.format(sum + fee));
         $("#inputTotal").val(sum + fee);
       } else {

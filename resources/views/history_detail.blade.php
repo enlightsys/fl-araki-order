@@ -16,9 +16,9 @@
       <div class="card-header">
         購入履歴
       </div>
-      <div class="card-body">
+      <div class="card-body py-0">
         <div class="row">
-          <aside class="col-sm-4 border-right">
+          <aside class="col-sm-4 border-right pt-2" id="leftcol">
             @if ($order)
             <dl>
               <dt>注文ID</dt><dd>{{ $order->id + 10000 }}</dd>
@@ -29,7 +29,7 @@
             </dl>
             @endif
           </aside>
-          <aside class="col-sm-8">
+          <aside class="col-sm-8 px-0">
             <table class="table table-hover shopping-cart-wrap">
               <thead class="text-muted">
                 <tr>
@@ -55,20 +55,21 @@
                     </figure>
                   </td>
                   <td>{{ $detail->quantity }}</td>
-                  <td>{{ number_format($detail->price) }} 円</td>
-                  <td>{{ number_format($detail->price * $detail->quantity) }} 円</td>
+                  <td class="text-nowrap">{{ number_format($detail->price) }} 円</td>
+                  <td class="text-nowrap">{{ number_format($detail->price * $detail->quantity) }} 円</td>
                 </tr>
                 @endforeach
               </tbody>
             </table>
-            <p class="text-right mt-3">小計：{{ number_format($order->sum) }}円</p>
-            <p class="text-right">送料：{{ number_format($order->fee) }}円</p>
-            <p class="text-right">手数料：{{ number_format($order->in_fee) }}円</p>
-            <p class="text-right">合計：{{ number_format($order->total) }}円</p>
+            <p class="text-right mt-3 mr-2">小計：{{ number_format($order->sum) }}円</p>
+            <p class="text-right mr-2">送料：{{ number_format($order->fee) }}円</p>
+            <p class="text-right mr-2">手数料：{{ number_format($order->in_fee) }}円</p>
+            <p class="est"><a  class="btn btn-sm btn-info" href="/estimate/{{ $order->id }}" target="_blank">見積書ダウンロード</a></p>
+            <p class="text-right mr-2">合計：{{ number_format($order->total) }}円</p>
           </aside>
         </div>
       </div>
-      <div class="card-footer text-center mt-4">
+      <div class="card-footer text-center">
         <form action="/reorder/{{ $order->id }}" method="post">
           @csrf
           <input type="hidden" name="id" value="{{ $order->id }}" />
@@ -88,10 +89,20 @@
     width: 100px;
     margin-right: 10px;
   }
+  .est {
+    width: 200px;
+    float: left;
+    margin-left: 10px;
+  }
 </style>
 @stop
 
 @section('js')
 <script type="text/javascript">
+$(function(){
+  if (navigator.userAgent.match(/iPhone|Android.+Mobile/)) {
+    $("#leftcol").removeClass('border-right');
+  }
+});
 </script>
 @stop

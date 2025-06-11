@@ -4,7 +4,7 @@
   <div class="container py-4">
     <h3>{{ Auth::user()->name }} 様の会員ページ</h3>
     <div class="row mt-4">
-      <div class="col-md-6">
+      <div class="col-md-6 mb-4">
         <h5>ご注文履歴</h5>
         <p><small>ご注文内容の確認ができます。</small></p>
         <a class="btn btn-info" href="/history">ご注文履歴を確認する</a>

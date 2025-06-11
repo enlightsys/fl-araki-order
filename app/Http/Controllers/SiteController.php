@@ -22,6 +22,12 @@ use App\Mail\MailCheckoutAdmin;
 use App\Mail\MailCheckoutUser;
 use Intervention\Image\ImageManagerStatic;
 
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as Reader;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+
 class SiteController extends Controller
 {
     public function __construct()
@@ -102,13 +108,22 @@ class SiteController extends Controller
             }
         }
         if ($id == -1) {
-            $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => $input['quantity']];
+            if (is_numeric($input['quantity'])) {
+                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => $input['quantity']];
+            } else {
+                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => 1];
+            }
         } else {
-            $cart[$id]['quantity'] += $input['quantity'];
+            if (is_numeric($input['quantity'])) {
+                $cart[$id]['quantity'] += $input['quantity'];
+            }
         }
 
         $request->session()->put('cart', $cart);
 
+        if (($input['mode'] ?? '') == "checkout") {
+            return redirect('/checkout');
+        }
         return redirect('/cart');
     }
 
@@ -130,7 +145,7 @@ class SiteController extends Controller
         $cart = $request->session()->get('cart');
 
         foreach ($input['quantity'] as $id => $q) {
-            $cart[$id]['quantity'] = $q;
+            $cart[$id]['quantity'] = (is_numeric($q) && $q > 0) ? $q : 1;
         }
         foreach ($input['remove'] as $id => $remove) {
             if ($remove == "1") {
@@ -140,6 +155,9 @@ class SiteController extends Controller
 
         $request->session()->put('cart', $cart);
 
+        if (($input['mode'] ?? '') == "checkout") {
+            return redirect('/checkout');
+        }
         return redirect('/cart');
     }
 
@@ -339,6 +357,11 @@ EOM;
         return view('privacy');
     }
 
+    public function guide()
+    {
+        return view('guide');
+    }
+
     public function contact()
     {
         return view('contact');
@@ -444,6 +467,31 @@ EOM;
         $order_details = OrderDetail::where("order_id", $order_id)->get();
 
         return view('history_detail', compact('order', 'order_details'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function estimate($order_id)
+    {
+        $member_id = Auth::user()->id;
+        $order = Order::where('member_id', $member_id)->where("id", $order_id)->first();
+        if (!$order) {
+            return redirect('/');
+        }
+        $path = $this->make_estimate($order_id);
+
+        $filename = '見積書_'.date('Ymd').'.pdf';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Cache-Control: max-age=0');
+
+        readfile($path);
+
+        exit;
     }
 
     public function reorder(Request $request, $order_id)
@@ -567,4 +615,117 @@ EOM;
     {
         \Log::info($request->all());
     }
+
+    private function make_estimate($order_id)
+    {
+        $order = Order::find($order_id);
+        $order_details = OrderDetail::where("order_id", $order_id)->get();
+
+        $categories = Category::where("site_id", 1)->orderBy('rank')->pluck('category', 'id');
+
+        $template = "/home/flx20121018/flower-araki.jp/public_html/manage/fl-araki-manage/resources/excel/estimate.xlsx";
+        $reader = new Reader();
+        $book = $reader->load($template);
+
+        $sheet = $book->getSheetByName('見積書');
+
+        $pref = config('const.pref');
+
+        $zip = $order->zip;
+        if (strlen($zip) == 7) {
+            $zip = substr($zip, 0, 3)."-".substr($zip, 3);
+        }
+
+        $count = "/home/flx20121018/flower-araki.jp/public_html/manage/fl-araki-manage/storage/app/estimate.txt";
+        $count++;
+        file_put_contents(storage_path("app/estimate.txt"), $count);
+
+        $sheet->setCellValue('P1', "No.".sprintf("%07d", $count));
+        $sheet->setCellValue('C2', "〒".$zip);
+        $sheet->setCellValue('C3', ($pref[$order->pref_id] ?? '').$order->city);
+        $sheet->setCellValue('C4', $order->address);
+
+        $name = $order->name;
+        if ($order->contact_name) {
+            $name .= " ".$order->contact_name;
+        }
+        $name .= " 様";
+        $sheet->setCellValue('C6', $name);
+        $sheet->setCellValue('P3', date("Y年n月j日 発行"));
+
+        $ship_address = "";
+        $zip = $order->ship_zip;
+        if (strlen($zip) == 7) {
+            $zip = substr($zip, 0, 3)."-".substr($zip, 3);
+        }
+
+        if ($zip) {
+            $ship_address = "〒".$zip;
+        }
+        $ship_address .= " ".($pref[$order->ship_pref_id] ?? '').$order->ship_city;
+        $ship_address .= $order->ship_address;
+
+        $name = $order->ship_name;
+        $name .= " 様";
+
+        $sheet->setCellValue('B11', $ship_address);
+        $sheet->setCellValue('B12', $name);
+
+        $row = 15;
+        foreach ($order_details as $key => $detail) {
+            $sheet->setCellValue('A'.$row, date("Y/n/j", strtotime($order->created_at)));
+            if ($order->delivery_date) {
+                $sheet->setCellValue('D'.$row, date("Y/n/j", strtotime($order->delivery_date)));
+            }
+            $sheet->setCellValue('E'.$row, sprintf("%04d", $order->id).sprintf("%03d", $detail->id));
+            $sheet->setCellValue('F'.$row, $detail->name);
+            $sheet->setCellValue('J'.$row, $detail->quantity);
+            $sheet->setCellValue('K'.$row, $detail->price);
+            $sheet->setCellValue('L'.$row++, $detail->quantity * $detail->price);
+
+            if ($detail->nameplate) {
+                $nameplate = $detail->nameplate;
+                $rows = explode("\r\n", $nameplate);
+
+                $pre = "[名札] ";
+                foreach ($rows as $text) {
+                    $sheet->setCellValue('F'.$row++, $pre.$text);
+                    $pre = "　";
+                }
+            }
+        }
+        $sheet->setCellValue('F'.$row, "送料");
+        $sheet->setCellValue('I'.$row, 1);
+        $sheet->setCellValue('J'.$row, $order->fee);
+        $sheet->setCellValue('K'.$row++, $order->fee);
+
+        if ($order->in_fee) {
+            $sheet->setCellValue('F'.$row, "手数料");
+            $sheet->setCellValue('I'.$row, 1);
+            $sheet->setCellValue('J'.$row, $order->in_fee);
+            $sheet->setCellValue('K'.$row++, $order->in_fee);
+        }
+        $row++;
+        $sheet->setCellValue('F'.$row++, "【合計】");
+        $sheet->setCellValue('F'.$row, "注文合計");
+        $sheet->setCellValue('K'.$row++, $order->total);
+        $sheet->setCellValue('F'.$row, "内、消費税 (10%)");
+        $sheet->setCellValue('K'.$row++, $order->total - ($order->total / 1.1));
+        $sheet->setCellValue('F'.$row, "請求金額");
+        $sheet->setCellValue('K'.$row++, $order->total);
+
+        $writer = IOFactory::createWriter($book, 'Xlsx');
+        // $writer->save('php://output');
+
+        $str = date("YmdHis").rand(100, 999);
+        $path = sys_get_temp_dir()."/".$str.".xlsx";
+        $writer->save($path);
+
+        $pdf_path = storage_path('app/pdf');
+        $cmd = '/home/flx20121018/lib/libreoffice/instdir/program/soffice --headless --convert-to pdf --outdir '.$pdf_path.' '.$path;
+        exec($cmd);
+
+        return $pdf_path."/".$str.".pdf";
+    }
+
 }

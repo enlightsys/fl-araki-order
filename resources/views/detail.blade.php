@@ -7,9 +7,9 @@
       {{ session('status') }}
     </div>
     @endif
-    <div class="card py-5 mt-4">
-      <div class="row">
-        <aside class="col-sm-5 border-right">
+    <div class="card pb-4 mb-4 mt-4">
+      <div class="row mb-2">
+        <aside class="col-sm-5 border-right mb-2">
           <article class="gallery-wrap"> 
             <div class="img-big-wrap">
               <div> <a href="#" id="open-image"><img src="/products/image?p={{ $product->image1 }}&w=600" data-src="https://flower-araki.jp/data/images/{{ $product->image1 }}" alt="{{ $product->name }}" id="main-image" /></a></div>
@@ -29,13 +29,13 @@
           </article> <!-- gallery-wrap .end// -->
         </aside>
         <aside class="col-sm-7">
-          <article class="card-body px-5 py-0">
+          <article class="card-body py-0">
             <form class="" action="{{ route('put_in')}}" method="POST">
               @csrf
               <input type="hidden" name="id" value="{{ $product->id }}" />
-              <h3 class="title mb-3">{{ $product->name }}</h3>
+              <h3 class="title mb-3 mt-3">{{ $product->name }}</h3>
 
-              <p class="price-detail-wrap"> 
+              <p class="price-detail-wrap text-right"> 
                 <span class="price h3 text-price"> 
                   <span class="num">{{ number_format($product->price) }}</span><span class="currency">円</span>
                 </span> 
@@ -49,34 +49,30 @@
 
               <hr>
               <div class="form-group">
+              @if ($product->quantity_input == 0)
                 <label for="exampleFormControlTextarea1">名札・ネームプレート</label>
                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="4" name="nameplate"placeholder="例）
 ・供　山田太郎
 ・献花　子供一同
 "></textarea>
+                <input type="hidden" name="quantity" value="1" />
+              @endif
               </div>
-
-
-              {{--
-              <hr>
               <div class="row">
-                <div class="col-sm-5">
-                  <dl class="param param-inline">
-                    <dt>数量: </dt>
-                    <dd>
-                      <select class="form-control form-control-sm" style="width:70px;" name="quantity">
-                        <option> 1 </option>
-                        <option> 2 </option>
-                        <option> 3 </option>
-                      </select>
-                    </dd>
-                  </dl>  <!-- item-property .// -->
-                </div> <!-- col.// -->
-              </div> <!-- row.// -->
-              --}}
-              <hr>
-              <input type="hidden" name="quantity" value="1" />
-              <button class="btn btn-lg btn-info"> <i class="fas fa-shopping-cart"></i> カートに入れる </button>
+                <div class="col-sm-12 text-center">
+              @if ($product->quantity_input)
+                <label for="exampleFormControlQuantity">数量：</label>
+                  <input type="number" class="form-inline form-control form-control-sm mr-4 w100" id="" name="quantity" value="1" />
+                <input type="hidden" name="nameplate" value="" />
+              @endif
+                  <button class="btn btn-lg btn-info"> <i class="fas fa-shopping-cart"></i> カートに入れる </button>
+                </div>
+                <div class="col-sm-12 mt-2">
+              @if ($product->quantity_input == 0)
+              <p class="small mt-4 text-secondary">※ 複数個購入されたい場合は、こちらのページから「カートに入れる」を複数回行ってください。</p>
+              @endif
+                </div>
+              </div>
             </article> <!-- card-body.// -->
           </form>
         </aside> <!-- col.// -->
@@ -100,7 +96,6 @@
 @section('css')
 <style type="text/css">  
 .gallery-wrap .img-big-wrap img {
-  height: 450px;
   width: 100%;
   display: inline-block;
   cursor: zoom-in;
@@ -134,6 +129,15 @@
 }
 #image-modal {
   width: 100%;
+}
+.card {
+  margin-bottom: 160px !important;
+}
+.form-inline {
+  display: inline-block;
+}
+.w100 {
+  width: 100px;
 }
 </style>
 @stop

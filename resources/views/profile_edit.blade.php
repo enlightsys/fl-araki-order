@@ -4,7 +4,7 @@
 <div class="container">
   <div class="row justify-content-center mt-4">
     <div class="col-md-8">
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-header">会員情報の変更</div>
 
         <div class="card-body">
@@ -41,7 +41,7 @@
               <label for="zip" class="col-md-4 col-form-label text-md-end">ご住所 <span class="text-red">（※）</span></label>
 
               <div class="col-md-8">
-                〒 <input type="text" class="form-control form-zip @error('zip') is-invalid @enderror" name="zip" value="{{ old('zip', $member['zip']) }}" placeholder="0001111" onkeyup="AjaxZip3.zip2addr(this, '', 'pref_id', 'city');" />
+                〒 <input type="text" class="form-control form-zip @error('zip') is-invalid @enderror" name="zip" value="{{ old('zip', $member['zip']) }}" placeholder="0001111" onkeyup="AjaxZip3.zip2addr(this, '', 'pref_id', 'city');" maxlength="8" />
                 <select name="pref_id" id="inputPref" class="form-control form-pref @error('pref_id') is-invalid @enderror">
                   <option value="">-- 都道府県 --</option>
                   @foreach (config('const.pref') as $id => $val)
@@ -61,7 +61,7 @@
               </div>
             </div>
             <div class="row mb-3">
-              <label for="name" class="col-md-4 col-form-label text-md-end">&nbsp;</label>
+              <label for="name" class="col-md-4 col-form-label text-md-end d-none d-md-block d-lg-block d-xl-block">&nbsp;</label>
 
               <div class="col-md-8">
                 <input id="city" type="text" class="form-control @error('city') is-invalid @enderror" name="city" value="{{ old('city', $member['city']) }}" placeholder="市区町村" />
@@ -73,7 +73,7 @@
               </div>
             </div>
             <div class="row mb-3">
-              <label for="name" class="col-md-4 col-form-label text-md-end">&nbsp;</label>
+              <label for="name" class="col-md-4 col-form-label text-md-end d-none d-md-block d-lg-block d-xl-block">&nbsp;</label>
 
               <div class="col-md-8">
                 <input id="address" type="text" class="form-control @error('address') is-invalid @enderror" name="address" value="{{ old('address', $member['address']) }}" placeholder="番地 建物名" />
@@ -88,7 +88,7 @@
               <label for="name" class="col-md-4 col-form-label text-md-end">電話番号 <span class="text-red">（※）</span></label>
 
               <div class="col-md-8">
-                <input id="tel" type="text" class="form-control @error('tel') is-invalid @enderror" name="tel" value="{{ old('tel', $member['tel']) }}" autofocus>
+                <input id="tel" type="text" class="form-control @error('tel') is-invalid @enderror" name="tel" value="{{ old('tel', $member['tel']) }}" maxlength="15" />
                 @error('tel')
                 <span class="invalid-feedback" role="alert">
                   <strong>{{ $message }}</strong>
@@ -125,11 +125,11 @@
 }
   .form-zip {
     display: inline-block;
-    width: 200px;
+    width: 120px;
   }
   .form-pref {
     display: inline-block;
-    width: 200px;
+    width: 160px;
   }
 </style>
 @stop

@@ -27,6 +27,7 @@ class Member extends Authenticatable
         'tel',
         'email',
         'password',
+        'bill_enabled',
     ];
 
     /**
