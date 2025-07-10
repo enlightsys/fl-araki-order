@@ -32,6 +32,7 @@ Route::get('/products/image', [App\Http\Controllers\SiteController::class, 'imag
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::get('/mypage', [App\Http\Controllers\SiteController::class, 'mypage'])->name('mypage');
+	Route::get('/bills/{year}/{month}', [App\Http\Controllers\SiteController::class, 'bills'])->name('bills');
 	Route::get('/profile', [App\Http\Controllers\SiteController::class, 'profile'])->name('profile');
 	Route::get('/profile_edit', [App\Http\Controllers\SiteController::class, 'profile_edit'])->name('profile_edit');
 	Route::post('/profile_update', [App\Http\Controllers\SiteController::class, 'profile_update'])->name('profile_update');

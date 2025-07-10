@@ -16,6 +16,7 @@ use App\Models\OrderDetail;
 use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Mail as MailModel;
+use App\Models\Bill;
 use App\Mail\MailContactAdmin;
 use App\Mail\MailContactUser;
 use App\Mail\MailCheckoutAdmin;
@@ -339,7 +340,22 @@ EOM;
 
     public function mypage()
     {
-        return view('mypage');
+        $bills = Bill::where('member_id', Auth::user()->id)->orderBy('year')->orderBy('month')->get();
+        return view('mypage', compact('bills'));
+    }
+
+    public function bills($year, $month)
+    {
+        $bill = Bill::where('member_id', Auth::user()->id)->where('year', $year)->where('month', $month)->first();
+
+        $filename = '請求書_'.$year."_".$month."_".date('YmdHi').'.pdf';
+        header('Content-Type: application/pdf');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Cache-Control: max-age=0');
+
+        readfile("/home/flx20121018/flower-araki.jp/public_html/manage/fl-araki-manage/storage/app/pdf/".$bill->attachment1);
+
+        return view('term');
     }
 
     public function term()
@@ -695,24 +711,24 @@ EOM;
             }
         }
         $sheet->setCellValue('F'.$row, "送料");
-        $sheet->setCellValue('I'.$row, 1);
-        $sheet->setCellValue('J'.$row, $order->fee);
-        $sheet->setCellValue('K'.$row++, $order->fee);
+        $sheet->setCellValue('J'.$row, 1);
+        $sheet->setCellValue('K'.$row, $order->fee);
+        $sheet->setCellValue('L'.$row++, $order->fee);
 
         if ($order->in_fee) {
             $sheet->setCellValue('F'.$row, "手数料");
-            $sheet->setCellValue('I'.$row, 1);
-            $sheet->setCellValue('J'.$row, $order->in_fee);
-            $sheet->setCellValue('K'.$row++, $order->in_fee);
+            $sheet->setCellValue('J'.$row, 1);
+            $sheet->setCellValue('K'.$row, $order->in_fee);
+            $sheet->setCellValue('L'.$row++, $order->in_fee);
         }
         $row++;
         $sheet->setCellValue('F'.$row++, "【合計】");
         $sheet->setCellValue('F'.$row, "注文合計");
-        $sheet->setCellValue('K'.$row++, $order->total);
+        $sheet->setCellValue('L'.$row++, $order->total);
         $sheet->setCellValue('F'.$row, "内、消費税 (10%)");
-        $sheet->setCellValue('K'.$row++, $order->total - ($order->total / 1.1));
+        $sheet->setCellValue('L'.$row++, $order->total - ($order->total / 1.1));
         $sheet->setCellValue('F'.$row, "請求金額");
-        $sheet->setCellValue('K'.$row++, $order->total);
+        $sheet->setCellValue('L'.$row++, $order->total);
 
         $writer = IOFactory::createWriter($book, 'Xlsx');
         // $writer->save('php://output');

@@ -254,7 +254,9 @@
                   <input class="form-check-input" type="checkbox" name="estimate" id="checkEstimate" value="1" @if (old('estimate', 1) == $id) checked="checked" @endif />
                   <label class="form-check-label" for="checkEstimate">見積書を希望する。</label>
                 </div>
+                <!-- <p class="mb-0 mt-4 form-mail">お問い合わせの方はこちらにメールください。<a href="mailto:chumon＠flower-araki.jp">chumon＠flower-araki.jp</a></p> -->
                 <textarea class="form-control mt-4" name="remark" rows="4" placeholder="その他ご希望などございましたら記入ください。">{{ old('remark') }}</textarea>
+                <p class="mb-0 mt-1 form-mail">※ 追加注文などの記入はご遠慮ください。</p>
             </div>
           </div>
           <div class="row mt-2">
@@ -347,6 +349,9 @@
   }
   .form-check-ship {
     margin-right: 3px;
+  }
+  .form-mail {
+    font-size: 0.9em;
   }
 </style>
 @stop

@@ -8,6 +8,12 @@
         <h5>ご注文履歴</h5>
         <p><small>ご注文内容の確認ができます。</small></p>
         <a class="btn btn-info" href="/history">ご注文履歴を確認する</a>
+        @if ($bills->count())
+        <h5 class="mt-4">発行済みご請求書</h5>
+          @foreach ($bills as $bill)
+            {{ $bill->year }}年{{ $bill->month }}月 <a href="/bills/{{ $bill->year }}/{{ $bill->month }}">ダウンロード</a>
+          @endforeach
+        @endif
       </div>
       <div class="col-md-6">
         <h5>アカウント設定</h5>
