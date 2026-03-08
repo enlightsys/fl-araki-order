@@ -2,6 +2,7 @@
   $payment_id = config('const.payment_id');
   $ship_time_id = config('const.ship_time_id');
   $pref = config('const.pref');
+  $nameplate_id = config('const.nameplate_id');
   $sum = 0;
 @endphp
 
@@ -26,7 +27,7 @@
 {{ $vars->ship_name }}
 
 ■発送先ご住所
-〒 {{ $vars->ship_zip }} {{ $pref[$vars->ship_pref_id] ?? ''}} {{ $vars->ship_city }} {{ $vars->ship_address }}
+〒 {{ $vars->ship_zip }} {{ $pref[$vars->ship_pref_id] ?? '' }} {{ $vars->ship_city }} {{ $vars->ship_address }}
 
 ■発送先電話番号
 {{ $vars->ship_tel }}
@@ -42,7 +43,7 @@
 
 ■注文商品情報
 @foreach ($products as $product)
-{{ $product->name }} 名札：{{ mb_ereg_replace("\r\n", "", $product->nameplate) }} {{ number_format($product->price) }} × {{ $product->quantity }} = {{ number_format($product->price * $product->quantity) }} 円 @php $sum += $product->price * $product->quantity; @endphp
+{{ $product->name }} 名札：{{ $nameplate_id[$product->nameplate_id ?? 1] ?? '' }} {{ mb_ereg_replace("\r\n", "", $product->nameplate) }} {{ number_format($product->price) }} × {{ $product->quantity }} = {{ number_format($product->price * $product->quantity) }} 円 @php $sum += $product->price * $product->quantity; @endphp
 @endforeach
 
 小計：{{ number_format($sum) }} 円

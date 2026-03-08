@@ -56,11 +56,18 @@
               <p class="form-control-plaintext">〒 {{ $member['zip'] }} {{ $pref[$member['pref_id']] ?? '' }} {{ $member['city'] }} {{ $member['address'] }}</p>
             </div>
           </div>
-          <div class="row mb-3">
+          <div class="row mb-0">
             <label for="name" class="col-md-4 col-form-label text-md-end">電話番号</label>
 
             <div class="col-md-8">
               <p class="form-control-plaintext">{{ $member['tel'] }}</p>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="name" class="col-md-4 col-form-label text-md-end">メールマガジン</label>
+
+            <div class="col-md-8">
+              <p class="form-control-plaintext">@if (old('mailmagazine', $member['mailmagazine']) == 1) 受信する @else 受信しない @endif</p>
             </div>
           </div>
 

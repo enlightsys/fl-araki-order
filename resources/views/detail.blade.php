@@ -46,16 +46,26 @@
               <p>{!! nl2br(e($product->note)) !!}</p>
               @endif
               
-
               <hr>
               <div class="form-group">
+                <input type="hidden" name="nameplate_id" value="0" />
               @if ($product->quantity_input == 0)
-                <label for="exampleFormControlTextarea1">名札・ネームプレート</label>
+                <label for="exampleFormControlTextarea1" class="mr-4">名札・ネームプレート</label>
+                @foreach (config('const.nameplate_id') as $id => $val)
+                <div class="form-check form-check-inline mr-2">
+                  <input class="form-check-input nameplate_id-input" type="radio" name="nameplate_id" id="inlineRadioNameplateId{{ $id }}" value="{{ $id }}" @if (old('nameplate_id', 1) == $id) checked="checked" @endif />
+                  <label class="form-check-label" for="inlineRadioNameplateId{{ $id }}">{{ $val }}</label>
+                </div>
+                @endforeach
+
                 <textarea class="form-control" id="exampleFormControlTextarea1" rows="4" name="nameplate"placeholder="例）
 ・供　山田太郎
 ・献花　子供一同
 "></textarea>
                 <input type="hidden" name="quantity" value="1" />
+                @if (session('error'))
+                <p class="small text-danger mt-1"><strong>{{ session('error') }}</strong></p>
+                @endif
               @endif
               </div>
               <div class="row">
@@ -152,6 +162,14 @@
     $("#open-image").click(function () {
       $("#image-modal").attr('src', $(this).parent().find('img').data('src'));
       $('#imageModal').modal('show');
+    });
+    $(".nameplate_id-input").click(function () {
+      const val = $(this).val();
+      if (val == "0") {
+        $("#exampleFormControlTextarea1").prop("disabled", true);
+      } else {
+        $("#exampleFormControlTextarea1").prop("disabled", false);
+      }
     });
   });
 </script>

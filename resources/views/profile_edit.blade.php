@@ -96,6 +96,14 @@
                 @enderror
               </div>
             </div>
+            <div class="row mb-3">
+              <label for="name" class="col-md-4 col-form-label text-md-end">メールマガジン</label>
+
+              <div class="col-md-8 form-check">
+                <input type="hidden" name="mailmagazine" value="0" />
+                <input type="checkbox" name="mailmagazine" id="chkMM" value="1" @if (old('mailmagazine', $member['mailmagazine']) == 1) checked="checked" @endif /><label for="chkMM">受信する</label>
+              </div>
+            </div>
 
             <div class="row mb-0">
               <div class="col-md-6 offset-md-4">
@@ -130,6 +138,12 @@
   .form-pref {
     display: inline-block;
     width: 160px;
+  }
+  #chkMM {
+    margin-right: 4px;
+  }
+  .form-check {
+    padding-top: 6px;
   }
 </style>
 @stop

@@ -3,7 +3,7 @@ html {
   min-height: 100%;
 }
 body {
-  margin-bottom: 140px;
+  /* margin-bottom: 140px; */
 }
 .footer {
   position: absolute;
@@ -60,3 +60,409 @@ a:hover {
 .searchbox {
   width: 180px !important;
 }
+
+@media (min-width: 992px) {
+  .navbar-expand-lg .navbar-nav .nav-link {
+    padding-right: .25rem;
+  }
+}
+
+
+
+/* 20251209 hanawa add */
+
+    /* カラーパレット定義 */
+    :root {
+      --main-color: #3A5F52; 
+      --sub-color: #D16A8C;
+      --footer-bg: #233B32;
+      --light-green: #dce9d2;
+      --text-color: #333;
+    }
+
+    /* ベーススタイル */
+    body {
+      font-family: sans-serif;
+      color: var(--text-color);
+      background-color: #fdfdfd;
+    }
+    h1, h2, h3, h4, h5, .serif-font {
+      font-family: 'Noto Serif JP', serif;
+    }
+
+    /* ヘッダー周り */
+    .header-top-utility {
+      font-size: 0.8rem;
+      padding: 6px 0;
+      background-color: #f4f4f4;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .header-top-utility a {
+      color: #555;
+      margin-left: 15px;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .header-top-utility a:hover {
+      color: var(--sub-color);
+    }
+
+    .header-main {
+      padding: 25px 0;
+      background-color: #fff;
+    }
+
+    /* タイトルリンク */
+    .brand-title {
+      font-family: 'Noto Serif JP', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--main-color);
+      text-decoration: none !important;
+      display: block;
+      transition: opacity 0.2s;
+    }
+    .brand-title:hover {
+        text-decoration: none !important;
+        opacity: 0.8; 
+    }
+
+    /* ロゴ下の公式サイトリンクボタン */
+    .btn-official-site {
+      display: inline-block;
+      background-color: var(--sub-color); 
+      color: #fff;
+      font-size: 0.75rem;
+      padding: 4px 15px;
+      margin-top: 5px;
+      border-radius: 20px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-official-site:hover {
+      background-color: var(--main-color);
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .header-actions .btn {
+      border-radius: 2px;
+      margin-left: 10px;
+      font-size: 0.85rem;
+      padding: 0.5rem 1.2rem;
+    }
+
+    /* ログイン・会員登録ボタン */
+    .btn-outline-custom {
+      color: var(--sub-color);
+      border: 1px solid var(--sub-color);
+      background-color: transparent;
+    }
+    .btn-outline-custom:hover {
+      background-color: var(--sub-color);
+      color: #fff;
+    }
+
+    .btn-custom {
+      background-color: var(--sub-color);
+      color: #fff;
+      border: 1px solid var(--sub-color);
+      transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+    }
+    .btn-custom:hover {
+      background-color: var(--footer-bg);
+      border-color: var(--footer-bg);
+      color: #fff; 
+    }
+    
+    /* カートリンク */
+    .cart-link {
+        text-decoration: none !important;
+    }
+    .cart-link:hover {
+        text-decoration: none !important;
+        opacity: 0.8;
+    }
+    .cart-icon {
+      font-size: 1.4rem;
+      color: var(--sub-color);
+      margin-left: 15px;
+      vertical-align: middle;
+    }
+
+    /* グローバルナビゲーション */
+    .custom-navbar {
+      background-color: var(--main-color) !important;
+      padding: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .custom-navbar .nav-link {
+      color: #fff !important;
+      font-size: 0.82rem; 
+      padding: 16px 10px;
+      border-right: none;
+      letter-spacing: 0.02em;
+      transition: background-color 0.3s, opacity 0.3s;
+      white-space: nowrap;
+    }
+    .custom-navbar .nav-link:hover {
+      background-color: rgba(0,0,0,0.2);
+      opacity: 1;
+    }
+    .custom-navbar .dropdown-toggle::after {
+      content: "▼";
+      border: none;
+      font-size: 0.5em;
+      margin-left: 3px;
+      vertical-align: 2px;
+      color: rgba(255,255,255,0.5);
+    }
+    @media (min-width: 992px) {
+      .navbar-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: space-between; 
+        width: 100%;
+      }
+      .nav-item {
+        flex-grow: 1; 
+        text-align: center;
+      }
+    }
+    .dropdown-menu {
+      border: none;
+      border-radius: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-top: 0;
+      padding: 0;
+    }
+    .dropdown-item {
+      padding: 12px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      color: #444;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    .dropdown-item:hover {
+      background-color: var(--light-green);
+      color: var(--main-color);
+    }
+
+    /* Jumbotron */
+    .jumbotron {
+      background: var(--light-green);
+      margin-bottom: 0;
+      padding: 3.5rem 2rem;
+      background: url('https://order.flower-araki.jp/assets/images/bg_title.png'); 
+      background-size: cover; 
+      color: #2c3e50;
+      border-radius: 0;
+      text-align: center;
+    }
+    .jumbotron h3 {
+        font-weight: 600;
+        display: inline-block;
+        letter-spacing: 0.1em;
+        margin-bottom: 0; 
+        border-bottom: none; 
+        padding-bottom: 0;
+        background-color: rgba(255, 255, 255, 0.75); 
+        padding: 10px 20px; 
+        border-radius: 5px;
+        text-shadow: 1px 1px 2px #fff; 
+    }
+
+    /* 3つのナビゲーションボックス */
+    .guide-nav-section {
+      padding: 40px 0;
+      background-color: #fdfdfd; 
+    }
+    .guide-box {
+      background-color: #fff;
+      border: 1px solid #eee;
+      padding: 20px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      text-decoration: none;
+      color: #444;
+      transition: all 0.3s ease;
+      min-height: 110px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
+      border-radius: 4px;
+    }
+    .guide-box:hover {
+      text-decoration: none;
+      box-shadow: 0 8px 20px rgba(58, 95, 82, 0.15);
+      transform: translateY(-3px);
+      background-color: #fff;
+    }
+    .guide-icon-circle {
+      min-width: 50px;
+      width: 50px;
+      height: 50px;
+      background-color: var(--sub-color);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 20px;
+      font-size: 1.2rem;
+    }
+    .guide-text { text-align: left; }
+    .guide-text h5 {
+      margin: 0 0 5px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--main-color);
+    }
+    .guide-text span {
+      font-size: 0.8rem;
+      color: #777;
+      display: block;
+      line-height: 1.4;
+    }
+    .banner-section {
+      padding: 0 0 50px;
+      text-align: center;
+    }
+    .banner-wrapper {
+        display: block;
+        width: 100%;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-decoration: none;
+        transition: transform 0.3s;
+        line-height: 0; /* 画像下の隙間対策 */
+    }
+    .banner-wrapper:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+    .banner-img {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+        object-fit: contain; 
+    }
+
+    /* コンテンツエリア */
+    .album { background-color: #fff !important; }
+    h4 {
+        border-bottom: 2px solid var(--light-green);
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        font-size: 1.5rem;
+    }
+    h5 {
+        font-size: 1.2rem;
+        border-left: 4px solid var(--sub-color);
+        padding-left: 10px;
+        margin-bottom: 20px;
+    }
+    .card { transition: transform 0.3s; }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .card.h-100 > a {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .card.h-100 > a > .card-body {
+        flex-grow: 1;
+    }
+
+    .btn-more {
+      display: inline-block;
+      padding: 10px 30px;
+      color: var(--main-color);
+      background-color: #fff;
+      border: 1px solid var(--main-color);
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      transition: all 0.3s;
+    }
+    .btn-more:hover {
+      background-color: var(--main-color);
+      color: #fff;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(58, 95, 82, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* フッター */
+    .footer-custom {
+      background-color: var(--footer-bg);
+      color: #e0e0e0;
+      padding: 60px 0 20px;
+      font-size: 0.9rem;
+    }
+    .footer-custom h6 {
+      color: #fff;
+      margin-bottom: 25px;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 10px;
+    }
+    .footer-custom ul { padding-left: 0; list-style: none; }
+    .footer-custom ul li { margin-bottom: 12px; }
+    .footer-custom a { color: #ccc; text-decoration: none; transition: color 0.2s; }
+    .footer-custom a:hover { color: #fff; text-decoration: underline; }
+    .copyright {
+      margin-top: 50px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 25px;
+      color: #aaa;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 767px) {
+      .footer-custom h6 {
+        margin-top: 40px;
+      }
+      .footer-custom .col-md-4:first-child h6 {
+        margin-top: 0;
+      }
+    }
+
+.cart-badge {
+      position: absolute;
+      top: -8px; 
+      left: 30px;
+      background-color: #e74c3c;
+      color: #fff;
+      font-size: 9px; 
+      min-width: 16px;
+      height: 16px;
+      line-height: 16px;
+      border-radius: 50%;
+      text-align: center;
+      box-shadow: 0 0 0 2px #fff;
+      z-index: 10;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+    .search-icon {
+      position: absolute;
+      left: 10px; 
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa; 
+      pointer-events: none; 
+      z-index: 5;
+      font-size: 1rem;
+    }
+    .search-input-padding {
+      padding-left: 30px !important; 
+    }

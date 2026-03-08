@@ -17,6 +17,7 @@ use App\Models\Category;
 use App\Models\SubCategory;
 use App\Models\Mail as MailModel;
 use App\Models\Bill;
+use App\Models\Taxonomy;
 use App\Mail\MailContactAdmin;
 use App\Mail\MailContactUser;
 use App\Mail\MailCheckoutAdmin;
@@ -100,19 +101,29 @@ class SiteController extends Controller
             return redirect('/');
         }
 
+        if (!empty($input['nameplate'])) {
+            $input['nameplate'] = trim($input['nameplate']);
+        }
+        if ($input['nameplate_id'] == "1" && $input['nameplate'] == "") {
+            return redirect('/detail/'.$id)->with('error', '名札・ネームプレート入力ありの場合は内容を入力してください。');
+        }
+        if ($input['nameplate_id'] == "0") {
+            $input['nameplate'] = "";
+        }
+
         $cart = $request->session()->get('cart') ?? [];
         $id = -1;
         foreach ($cart as $key => $value) {
-            if ($value['product_id'] == $input['id'] && $value['nameplate'] == $input['nameplate']) {
+            if ($value['product_id'] == $input['id'] && $value['nameplate'] == $input['nameplate'] && $value['nameplate_id'] == $input['nameplate_id']) {
                 $id = $key;
                 break;
             }
         }
         if ($id == -1) {
             if (is_numeric($input['quantity'])) {
-                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => $input['quantity']];
+                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'nameplate_id' => $input['nameplate_id'], 'quantity' => $input['quantity']];
             } else {
-                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'quantity' => 1];
+                $cart[] = ['product_id' => $input['id'], 'nameplate' => $input['nameplate'], 'nameplate_id' => $input['nameplate_id'], 'quantity' => 1];
             }
         } else {
             if (is_numeric($input['quantity'])) {
@@ -199,31 +210,6 @@ class SiteController extends Controller
         }
 
         $input = $request->all();
-        $input['member_id'] = Auth::user()->id;
-        $input['status_id'] = 1;
-        $ret = Order::create($input);
-
-        $products = [];
-
-        foreach ($cart as $value) {
-            $product = Product::find($value['product_id']);
-
-            $arr = [
-                'order_id' => $ret->id,
-                'product_id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->price,
-                'quantity' => $value['quantity'],
-                'nameplate' => $value['nameplate'],
-            ];
-
-            $detail = OrderDetail::create($arr);
-
-            $product->quantity = $value['quantity'];
-            $product->nameplate = $value['nameplate'];
-
-            $products[] = $product->toArray();
-        }
 
         if ($request->has("zeus_xid")) {
             // $url = "https://secure2-sandbox.cardservice.co.jp/cgi-bin/secure/api.cgi"; //testing
@@ -256,7 +242,8 @@ EOM;
 
                 \Log::info($arr);
 
-                $xml = <<< EOM
+                if ($arr['result']['status'] == "success") {
+                    $xml = <<< EOM
 <?xml version="1.0" encoding="utf-8"?>
 <request service="secure_link_3d" action="payment">
   <xid>$xid</xid>
@@ -264,23 +251,64 @@ EOM;
   <print_addition_value>yes</print_addition_value>
 </request>
 EOM;
-                \Log::info($xml);
+                    \Log::info($xml);
 
-                $context = [
-                    'http' => [
-                        'method'  => 'POST',
-                        'header'  => 'Content-Type: application/xml',
-                        'content' => $xml
-                    ]
-                ];
+                    $context = [
+                        'http' => [
+                            'method'  => 'POST',
+                            'header'  => 'Content-Type: application/xml',
+                            'content' => $xml
+                        ]
+                    ];
 
-                $res = file_get_contents($url, false, stream_context_create($context));
+                    $res = file_get_contents($url, false, stream_context_create($context));
 
-                $obj = simplexml_load_string($res);
-                $arr = json_decode(json_encode($obj), true);
+                    $obj = simplexml_load_string($res);
+                    $arr = json_decode(json_encode($obj), true);
 
-                \Log::info($arr);
+                    \Log::info($arr);
+                    if ($arr['result']['status'] == "success") {
+                    } else {
+                        return view('error', ['message' => "決済エラーが発生しました。恐れ入りますが、再度操作をお願いします。"]);
+                    }
+                } else {
+                    return view('error', ['message' => "決済エラーが発生しました。恐れ入りますが、再度操作をお願いします。"]);
+                }
             }
+        }
+
+        $input['member_id'] = Auth::user()->id;
+        $input['status_id'] = 1;
+        $ret = Order::create($input);
+
+        $member_id = Auth::user()->id;
+        $member = Member::find($member_id);
+        if ($input['payment_id'] == 2) {
+            $member->consent = 1;
+            $member->save();
+        }
+        $products = [];
+
+        foreach ($cart as $value) {
+            $product = Product::find($value['product_id']);
+
+            $arr = [
+                'order_id' => $ret->id,
+                'product_id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $value['quantity'],
+                'nameplate_id' => $value['nameplate_id'] ?? 1,
+                'nameplate' => $value['nameplate'],
+            ];
+
+            $detail = OrderDetail::create($arr);
+
+            $product->quantity = $value['quantity'];
+            $product->nameplate = $value['nameplate'];
+            $product->nameplate_id = $value['nameplate_id'] ?? 1;
+
+            $products[] = $product->toArray();
         }
 
         $mailadmin = new MailCheckoutAdmin($input, $products);
@@ -344,11 +372,11 @@ EOM;
         return view('mypage', compact('bills'));
     }
 
-    public function bills($year, $month)
+    public function bills($id)
     {
-        $bill = Bill::where('member_id', Auth::user()->id)->where('year', $year)->where('month', $month)->first();
+        $bill = Bill::where('member_id', Auth::user()->id)->where('id', $id)->first();
 
-        $filename = '請求書_'.$year."_".$month."_".date('YmdHi').'.pdf';
+        $filename = '請求書_'.$id."_".date('YmdHi').'.pdf';
         header('Content-Type: application/pdf');
         header('Content-Disposition: attachment; filename="'.$filename.'"');
         header('Cache-Control: max-age=0');
@@ -381,6 +409,12 @@ EOM;
     public function contact()
     {
         return view('contact');
+    }
+
+    public function faq()
+    {
+        $taxonomies = Taxonomy::all();
+        return view('faq', compact('taxonomies'));
     }
 
     public function contact_confirm(ContactRequest $request)
@@ -525,13 +559,13 @@ EOM;
             if ($detail->product != null) {
                 $id = -1;
                 foreach ($cart as $key => $value) {
-                    if ($value['product_id'] == $detail->product_id && $value['nameplate'] == $detail->nameplate) {
+                    if ($value['product_id'] == $detail->product_id && $value['nameplate'] == $detail->nameplate && $value['nameplate_id'] == $detail->nameplate_id) {
                         $id = $key;
                         break;
                     }
                 }
                 if ($id == -1) {
-                    $cart[] = ['product_id' => $detail->product_id, 'nameplate' => $detail->nameplate, 'quantity' => $detail->quantity];
+                    $cart[] = ['product_id' => $detail->product_id, 'nameplate' => $detail->nameplate, 'nameplate_id' => $detail->nameplate_id, 'quantity' => $detail->quantity];
                 } else {
                     $cart[$id]['quantity'] += $detail->quantity;
                 }
@@ -548,11 +582,19 @@ EOM;
 
     public function image(Request $request) {
         $path = $request->input("p");
+        $c_path = '/home/flx20121018/flower-araki.jp/public_html/data/images/cache/'.$path;
 
-        $image = ImageManagerStatic::make('/home/flx20121018/flower-araki.jp/public_html/data/images/'.$path);
-        return $image->resize(480, null, function ($constraint) {
-            $constraint->aspectRatio();
-        })->response('jpg');
+        if (file_exists($c_path) && filemtime($c_path) < strtotime("-2 day")) {
+            @unlink($c_path);
+        }
+        if (!file_exists($c_path)) {
+            $image = ImageManagerStatic::make('/home/flx20121018/flower-araki.jp/public_html/data/images/'.$path);
+            $image->resize(480, null, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save($c_path, 70);
+        }
+
+        return response()->file($c_path);
     }
 
     /**

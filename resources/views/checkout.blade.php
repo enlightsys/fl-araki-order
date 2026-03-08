@@ -182,7 +182,7 @@
                   <div class="form-check form-check-inline">
                     <input class="form-check-input payment-input" type="radio" name="payment_id" id="inlineRadioPayment{{ $id }}" value="{{ $id }}" @if (old('payment_id', 1) == $id) checked="checked" @endif />
                     <label class="form-check-label" for="inlineRadioPayment{{ $id }}">{{ $val }}</label>
-                </div>
+                  </div>
                   @endforeach
                 </div>
               </div>
@@ -191,7 +191,27 @@
               @endif
 
               <div class="form-group row mb-0 mt-3 payment-bill">
-                <div class="col-md-12"><p>月締請求でのお支払いになります。</p></div>
+                <div class="col-md-12">
+                  <p>月締請求でのお支払いになります。</p>
+                  @if ($member->consent == 0)
+                  <input type="hidden" name="consent" id="memberConsent" value="" />
+                  <p>これまで通り柔軟に対応させていただきますが、
+                    事務処理の安定化のため、月締め請求をご希望のお客様には
+                    ご利用時に一度だけお支払い条件の確認チェックをお願いする形に変更いたしました。
+                    ご理解賜れますと幸いです。</p>
+
+                  <p>月末締めの請求書を発行し、お支払い期限は翌月末となります。
+                    運用上、翌々月末までは柔軟に確認期間を設けておりますが、
+                    期限を過ぎた場合は確認のご連絡を差し上げる場合がございます。</p>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="consent" id="memberConsent1" value="1" />
+                    <label class="form-check-label" for="memberConsent1">内容を確認しました。</label>
+                    <p class="text-danger error-checkout" id="error-consent">@error('consent') {{ $message }} @enderror</p>
+                  </div>
+                  @else
+                  <input type="hidden" name="consent" id="memberConsent" value="1" />
+                  @endif
+                </div>
               </div>
               @if (!$card_disabled)
               <input type="radio" id="zeus_token_action_type_new" name="zeus_card_option" value="new" checked="checked" class="d-none" />
@@ -263,6 +283,7 @@
             <div class="col-md-12">
               <button type="button" class="btn btn-primary cmd-checkout payment-credit" id="cmd-credit" @if ($card_disabled) disabled="disabled" @endif>今すぐ支払う</button>
               <button type="button" class="btn btn-primary cmd-checkout payment-bill" id="cmd-bill">ご注文を完了する</button>
+              <!-- <button type="button" class="btn btn-secondary" id="cmd-wait"> </button> -->
             </div>
           </div>
           <!--CREDIT CART PAYMENT END-->
@@ -278,6 +299,17 @@
         <div class="modal-body modal-3ds">
           <div id="challenge_wait" class="text-center">しばらくお待ち下さい...</div>
           <div id="3dscontainer" class="area-3ds"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="waitModalCenter" tabindex="-1" role="dialog" aria-labelledby="waitModalCenterTitle" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-body modal-wait">
+          <div id="challenge_wait" class="text-center">現在購入処理中です。画面を閉じずにお待ちください。</div>
         </div>
       </div>
     </div>
@@ -335,6 +367,9 @@
   .modal-3ds {
     height: 400px;
   }
+  .modal-wait {
+    height: 60px;
+  }
   .area-3ds {
     height: 90%;
   }
@@ -388,23 +423,24 @@
       let val = $('input[name="ship_city"').val();
       if (val.length) {
         let sum = $("#inputSum").val() * 1;
-        let fee = 550;
+        let fee = 0;
 
-        if (sum >= 11000) {
-          fee = 0;
-        } else {
-          if (free == 1) {
-            fee = 0;
-          } else {
-            if (val.substr(0, 6) == "札幌市中央区") {
-              fee = 770;
-            } else if (val.substr(0, 3) == "札幌市") {
-              fee = 880;
-            } else if (val.substr(0, 4) == "北広島市" || val.substr(0, 3) == "石狩市") {
-              fee = 1100;
-            }
+        if (free != 1) {
+          if (val.substr(0, 6) == "札幌市中央区") {
+            fee = 770;
+          } else if (val.substr(0, 3) == "札幌市") {
+            fee = 880;
+          } else if (val.substr(0, 4) == "北広島市" || val.substr(0, 3) == "石狩市") {
+            fee = 1100;
           }
         }
+
+        if (fee == 0 && free != 1) {
+          fee = 990;
+        } else if (sum >= 11000) {
+          fee = 0;
+        }
+
         const formatter = new Intl.NumberFormat('ja-JP');
 
         $("#text-fee").text(formatter.format(fee));
@@ -505,7 +541,13 @@
     });
 
     $('#cmd-bill').on('click', function () {
+      $("#cmd-bill").prop("disabled", true);
+      $('#waitModalCenter').modal('show');
       $("#checkout-form").submit();
+    });
+
+    $('#cmd-wait').on('click', function () {
+      $('#waitModalCenter').modal('show');
     });
   });
 

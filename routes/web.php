@@ -14,10 +14,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Auth::routes();
+
+// ▼▼▼ 追加 ▼▼▼
 Route::get('/', [App\Http\Controllers\SiteController::class, 'index'])->name('index');
-Route::get('/list', [App\Http\Controllers\SiteController::class, 'list']);
+Route::get('/list', [App\Http\Controllers\SiteController::class, 'list'])->name('list');
+// ▲▲▲ ここまで ▲▲▲
+
 Route::get('/detail/{id}', [App\Http\Controllers\SiteController::class, 'detail'])->name('detail');
 Route::post('/put_in', [App\Http\Controllers\SiteController::class, 'put_in'])->name('put_in');
+Route::get('/faq', [App\Http\Controllers\SiteController::class, 'faq'])->name('faq');
 Route::get('/cart', [App\Http\Controllers\SiteController::class, 'cart'])->name('cart');
 Route::post('/cart_quantity', [App\Http\Controllers\SiteController::class, 'cart_quantity'])->name('cart_quantity');
 Route::get('/term', [App\Http\Controllers\SiteController::class, 'term'])->name('term');
@@ -32,7 +37,7 @@ Route::get('/products/image', [App\Http\Controllers\SiteController::class, 'imag
 
 Route::group(['middleware' => 'auth'], function () {
 	Route::get('/mypage', [App\Http\Controllers\SiteController::class, 'mypage'])->name('mypage');
-	Route::get('/bills/{year}/{month}', [App\Http\Controllers\SiteController::class, 'bills'])->name('bills');
+	Route::get('/bills/{id}', [App\Http\Controllers\SiteController::class, 'bills'])->name('bills');
 	Route::get('/profile', [App\Http\Controllers\SiteController::class, 'profile'])->name('profile');
 	Route::get('/profile_edit', [App\Http\Controllers\SiteController::class, 'profile_edit'])->name('profile_edit');
 	Route::post('/profile_update', [App\Http\Controllers\SiteController::class, 'profile_update'])->name('profile_update');

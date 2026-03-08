@@ -11,7 +11,7 @@
         @if ($bills->count())
         <h5 class="mt-4">発行済みご請求書</h5>
           @foreach ($bills as $bill)
-            {{ $bill->year }}年{{ $bill->month }}月 <a href="/bills/{{ $bill->year }}/{{ $bill->month }}">ダウンロード</a>
+            {{ $bill->year }}年{{ $bill->month }}月 <a href="/bills/{{ $bill->id }}">ダウンロード</a><br />
           @endforeach
         @endif
       </div>

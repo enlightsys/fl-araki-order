@@ -28,6 +28,8 @@ class Member extends Authenticatable
         'email',
         'password',
         'bill_enabled',
+        'mailmagazine',
+        'consent',
     ];
 
     /**
